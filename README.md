@@ -1,103 +1,138 @@
-🏙️ CivicConnect — Citizen-Driven Civic Engagement Platform
+# 🏙️ CivicConnect — Citizen-Driven Civic Engagement Platform  
 
-CivicConnect is an Android application designed to empower citizens to actively report, track, and prioritize civic issues within their communities. Built with Kotlin, Firebase, and Gemini AI, it bridges the communication gap between the public and local authorities through a transparent, data-driven reporting system.
+[![Android](https://img.shields.io/badge/Platform-Android-green?logo=android)](https://developer.android.com/)
+[![Firebase](https://img.shields.io/badge/Backend-Firebase-orange?logo=firebase)](https://firebase.google.com/)
+[![Kotlin](https://img.shields.io/badge/Language-Kotlin-blueviolet?logo=kotlin)](https://kotlinlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-🚀 Overview
+> Empowering citizens. Enhancing governance. One report at a time.  
 
-CivicConnect allows users to report local problems such as potholes, broken streetlights, garbage accumulation, or safety hazards directly from their smartphones. Each report is enhanced with location, images, and an AI-generated priority score, helping civic administrators act efficiently on the most critical issues first.
+---
 
-✨ Key Features
-🧭 Citizen Module
+## 📖 Overview  
 
-📸 Smart Issue Reporting – Users can submit issues with title, description, photo, and auto-detected location.
+**CivicConnect** is an Android application that enables citizens to report, track, and prioritize civic issues within their community.  
+Powered by **Firebase** and **Google Gemini AI**, the platform uses AI-driven prioritization to help local authorities address the most critical issues efficiently.  
 
-📍 Real-Time Location Integration – Auto-detects user’s current address via Google’s Fused Location Provider API.
+---
 
-🧠 AI-Based Priority Scoring (Gemini API) – Each report is analyzed by Google’s Gemini model to assess urgency from 0.0 (low) to 1.0 (high).
+## ✨ Key Features  
 
-🗂️ Categorization by Type – Choose from meaningful civic categories:
-Roads & Infra, Street Lighting, Water & Drainage, Waste & Sanitation,
-Public Spaces, Public Safety, Healthcare, Transport, Environment, and Civic Services.
+### 🧭 Citizen Module  
+- 📸 **Smart Issue Reporting** — Report issues with title, description, photo, and auto-detected location.  
+- 📍 **Location Detection** — Integrates Google’s Fused Location Provider for accurate geotagging.  
+- 🧠 **AI-Based Priority Scoring (Gemini API)** — Each report receives an urgency score between `0.0` (Low) and `1.0` (High).  
+- 🗂️ **Meaningful Categories** —  
+  `Roads & Infra`, `Street Lighting`, `Water & Drainage`, `Waste & Sanitation`,  
+  `Public Spaces`, `Public Safety`, `Healthcare`, `Transport`, `Environment`, `Civic Services`.  
+- 📄 **Status Tracking** — Follow issue progress (Pending → In Progress → Resolved).  
+- 🔔 **Real-Time Updates** — Firestore listeners ensure live issue updates.  
 
-📄 Status Tracking – Monitor your submitted issues (Pending, In Progress, Resolved).
+---
 
-🔔 Real-Time Updates – Firebase Cloud Firestore listeners update issue status instantly.
+### 🏛️ Administrator Module  
+- 🗃️ **Centralized Dashboard** — Monitor all issues in real time.  
+- 📊 **AI-Powered Sorting** — Automatically prioritizes critical issues for faster action.  
+- 📝 **Resolution Workflow** — Admins can update issue status, add remarks, or mark duplicates.  
+- 💬 **Transparency & Accountability** — Encourages open, citizen-driven civic improvement.  
 
-🏛️ Administrator Module
+---
 
-🗃️ Centralized Dashboard – View all reported issues in real time.
+## 🧩 Tech Stack  
 
-📊 Priority-Based Sorting – Quickly identify high-urgency reports via AI-generated scores.
+| Layer | Technology |
+|-------|-------------|
+| **Frontend** | Kotlin (Android, Material Design 3) |
+| **Backend** | Firebase Firestore, Firebase Storage, Firebase Authentication |
+| **AI Integration** | Google **Gemini API** via Firebase Cloud Functions |
+| **Cloud Hosting** | Firebase Cloud Functions v2 (Node.js 22 runtime) |
+| **APIs Used** | Fused Location Provider, Geocoder |
+| **Architecture** | MVVM + LiveData (lightweight) |
 
-📝 Issue Verification & Resolution Workflow – Change issue status, add remarks, and track duplicates.
+---
 
-💬 Transparency & Accountability – Promotes open communication between citizens and administration.
+## 🧠 AI Prioritization Logic  
 
-🧩 Tech Stack
-Layer	Technology
-Frontend	Kotlin (Android, Material Design 3)
-Backend	Firebase Firestore, Firebase Storage, Firebase Authentication
-AI Integration	Google Gemini API (via Firebase Cloud Functions)
-Cloud Hosting	Firebase Cloud Functions v2 (Node.js 22 runtime)
-APIs Used	Fused Location Provider, Geocoder API
-Architecture	MVVM + LiveData (lightweight implementation)
-🧠 How the AI Prioritization Works
+CivicConnect integrates Google Gemini 2.5 Flash through Firebase Cloud Functions to score reports by urgency.  
 
-CivicConnect integrates Google Gemini 2.5 Flash via Cloud Functions:
-
+```js
 // Simplified backend flow
-Given (Title, Description):
-  → Send to Gemini API with a system prompt
-  → Parse response into float(0.0–1.0)
-  → Return as `priorityScore` to Firestore
+Given (title, description):
+  → Send to Gemini API with civic impact prompt
+  → Parse response to float(0.0 – 1.0)
+  → Return as `priorityScore` for Firestore document
+```
+
+Scores reflect **public safety, environmental risk, and civic importance** — ensuring administrators see the most urgent reports first.  
+
+---
+
+## 📸 Screenshots  
+
+| 🏠 Home Page | 📝 Report Issue | 📋 My Issues |
+|--------------|----------------|--------------|
+| ![Home Page](screenshots/home-page.png) | ![Report Issue](screenshots/report-page.png) | ![My Issues](screenshots/issues-page.png) |
+
+| 🔍 Issue Detail | 👤 Profile | 🧭 Admin Issue List | 🗂️ Admin Issue Detail |
+|------------------|------------|---------------------|------------------------|
+| ![Issue Detail](screenshots/issue-detail.png) | ![Profile](screenshots/profile-page.png) | ![Admin Issue List](screenshots/admin-viewlist.png) | ![Admin Issue Detail](screenshots/admin-issuedetail.png) |
 
 
-The prompt asks Gemini to evaluate urgency based on public safety, environmental risk, and civic impact, returning a normalized score.
-This score directly influences sorting and visualization inside the admin dashboard.
+---
 
-📱 Screenshots
-Citizen Reporting	Issue Feed	AI Priority in Action
-🧾 Report an Issue	🗂️ Recent Issues	⚙️ AI-Generated Score
+## ⚙️ Setup & Deployment  
 
-(Screenshots will be added in final upload — placeholders above.)
+### 🧱 Prerequisites  
+- Android Studio (Arctic Fox or later)  
+- Firebase Project setup  
+- Gemini API Key (via Firebase Functions secret)  
 
-⚙️ Setup & Deployment
+### 🧩 Steps  
 
-Clone the repository:
-
+```bash
+# Clone the repository
 git clone https://github.com/<your-username>/CivicConnect.git
 cd CivicConnect
 
+# Add Firebase config
+/app/google-services.json
 
-Add your Firebase project configuration (google-services.json) under /app/.
-
-Configure Firebase Functions:
-
+# Setup Firebase Cloud Functions
 cd civicconnect-backend/functions
 npm install
 firebase functions:secrets:set GEMINI_API_KEY
 firebase deploy --only functions
+```
 
+Then open the project in **Android Studio**, sync Gradle, and run on a device or emulator (SDK 24+).  
 
-Build and run the Android app from Android Studio (minimum SDK 24).
+---
 
-📊 Example Priority Scores
-Example Report	Expected Priority
-“Broken streetlight near school”	0.8
-“Overflowing garbage bin”	0.65
-“Faded road markings”	0.5
-“Broken park bench”	0.3
-💡 Future Enhancements
+## 📊 Example Priority Scores  
 
-🧭 Route-based clustering for admin view (using Google Maps SDK).
+| Example Report | Expected Priority |
+|----------------|------------------|
+| *“Broken streetlight near school”* | 0.8 |
+| *“Overflowing garbage bin”* | 0.65 |
+| *“Faded zebra crossing lines”* | 0.5 |
+| *“Broken park bench”* | 0.3 |
 
-🕵️ Report similarity detection (duplicate issue merging).
+---
 
-🧾 AI summarization of local issue trends.
+## 🔮 Future Enhancements  
 
-🗳️ Open data portal for transparency metrics.
+- 🧭 Map-based clustering for administrators  
+- 🕵️ Duplicate issue detection using semantic similarity  
+- 🧾 AI summaries of regional issue trends  
+- 📈 Open data dashboard for transparency metrics  
 
-👨‍💻 Contributors
+---
 
-Developed by: [Your Name]
-Guided by: Department of Computer Science — [Your College Name]
+## 👨‍💻 Contributors  
+
+**Developed by:** Prakhyat Singh 
+**Guided by:** Department of Computer Science — Lovely Professional University
+
+---
+
+> _CivicConnect — A step towards smarter, citizen-driven governance._
