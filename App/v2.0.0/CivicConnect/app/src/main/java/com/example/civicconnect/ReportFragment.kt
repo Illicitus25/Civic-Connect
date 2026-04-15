@@ -33,7 +33,13 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
+import java.util.Locale
+import java.util.UUID
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 
 class ReportFragment : Fragment() {
 
@@ -46,6 +52,16 @@ class ReportFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var functions: FirebaseFunctions
     private var imageUri: Uri? = null
+
+    // Added for duplicate detection
+    private var detectedLatitude: Double? = null
+    private var detectedLongitude: Double? = null
+
+    private var submissionDialog: AlertDialog? = null
+
+    private var submissionStatusText: TextView? = null
+
+    private var justAMinuteJob: Job? = null
 
     private val requestAllPermissions = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -104,7 +120,7 @@ class ReportFragment : Fragment() {
         firestore = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
         auth = FirebaseAuth.getInstance()
-        functions = FirebaseFunctions.getInstance()
+        functions = FirebaseFunctions.getInstance("asia-south1")
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         setupListeners()
@@ -142,6 +158,9 @@ class ReportFragment : Fragment() {
     private fun detectLocation() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
+                detectedLatitude = location.latitude
+                detectedLongitude = location.longitude
+
                 lifecycleScope.launch(Dispatchers.IO) {
                     try {
                         val geocoder = Geocoder(requireContext(), Locale.getDefault())
@@ -159,7 +178,9 @@ class ReportFragment : Fragment() {
                         }
                     }
                 }
-            } else Toast.makeText(requireContext(), "Could not fetch location. Try again.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Could not fetch location. Try again.", Toast.LENGTH_SHORT).show()
+            }
         }.addOnFailureListener {
             Toast.makeText(requireContext(), "Location detection failed.", Toast.LENGTH_SHORT).show()
         }
@@ -207,6 +228,111 @@ class ReportFragment : Fragment() {
         }
     }
 
+    private fun resolveCoordinates(locationText: String): Pair<Double, Double>? {
+        return try {
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val address = geocoder.getFromLocationName(locationText, 1)?.firstOrNull()
+
+            if (address != null) {
+                address.latitude to address.longitude
+            } else {
+                val lat = detectedLatitude
+                val lon = detectedLongitude
+                if (lat != null && lon != null) lat to lon else null
+            }
+        } catch (_: Exception) {
+            val lat = detectedLatitude
+            val lon = detectedLongitude
+            if (lat != null && lon != null) lat to lon else null
+        }
+    }
+
+    private suspend fun checkDuplicateIssue(
+        title: String,
+        description: String,
+        category: String,
+        locationText: String
+    ): Map<*, *>? {
+        val coords = resolveCoordinates(locationText) ?: return null
+
+        val data = hashMapOf(
+            "title" to title,
+            "description" to description,
+            "category" to category,
+            "latitude" to coords.first,
+            "longitude" to coords.second
+        )
+
+        val result = functions.getHttpsCallable("checkDuplicateIssue").call(data).await()
+        return result.data as? Map<*, *>
+    }
+    private suspend fun showSubmissionProgress(message: String) {
+        withContext(Dispatchers.Main) {
+            if (!isAdded || _binding == null) return@withContext
+
+            binding.btnSubmitIssue.isEnabled = false
+
+            if (submissionDialog?.isShowing == true) {
+                submissionStatusText?.text = message
+                return@withContext
+            }
+
+            val dialogView = layoutInflater.inflate(R.layout.dialog_submission_progress, null)
+            submissionStatusText = dialogView.findViewById(R.id.tvSubmissionStatus)
+            submissionStatusText?.text = message
+
+            submissionDialog = MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
+            submissionDialog?.setCanceledOnTouchOutside(false)
+            submissionDialog?.show()
+            submissionDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        }
+    }
+
+    private suspend fun updateSubmissionProgress(
+        message: String,
+        allowJustAMinute: Boolean = false
+    ) {
+        withContext(Dispatchers.Main) {
+            if (!isAdded || _binding == null) return@withContext
+
+            submissionStatusText?.text = message
+            justAMinuteJob?.cancel()
+
+            if (allowJustAMinute) {
+                justAMinuteJob = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(1400)
+                    if (isAdded && submissionDialog?.isShowing == true) {
+                        submissionStatusText?.text = "Just a minute..."
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun completeSubmissionProgress() {
+        updateSubmissionProgress("Submitted!")
+        delay(500)
+        hideSubmissionProgress()
+    }
+
+    private suspend fun hideSubmissionProgress() {
+        withContext(Dispatchers.Main) {
+            justAMinuteJob?.cancel()
+            justAMinuteJob = null
+
+            if (_binding != null) {
+                binding.btnSubmitIssue.isEnabled = true
+            }
+
+            submissionDialog?.dismiss()
+            submissionDialog = null
+            submissionStatusText = null
+        }
+    }
 
     // ✨ GEMINI PRIORITY CALL
     private suspend fun getPriorityFromGemini(title: String, description: String): Double {
@@ -258,6 +384,23 @@ class ReportFragment : Fragment() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
+                val coords = resolveCoordinates(location)
+
+                if (coords == null) {
+                    withContext(Dispatchers.Main) {
+                        if (!isAdded || _binding == null) return@withContext
+                        Toast.makeText(
+                            requireContext(),
+                            "Could not resolve location coordinates. Please use Auto Detect or enter a clearer address.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    return@launch
+                }
+
+                val latitude = coords.first
+                val longitude = coords.second
+
                 var imageUrl: String? = null
 
                 // Upload image if selected
@@ -279,15 +422,46 @@ class ReportFragment : Fragment() {
                     imageUrl = storageRef.downloadUrl.await().toString()
                 }
 
-                withContext(Dispatchers.Main) {
-                    if (!isAdded || _binding == null) return@withContext
-                    Toast.makeText(requireContext(), "Analyzing priority...", Toast.LENGTH_SHORT).show()
+                showSubmissionProgress("Checking duplicates...")
+
+                val duplicateResult = checkDuplicateIssue(title, desc, category, location)
+
+                val isDuplicate = duplicateResult?.get("isDuplicate") as? Boolean ?: false
+                val duplicateOf = duplicateResult?.get("duplicateOf")?.toString()
+                val duplicateTrackingNumber = duplicateResult?.get("duplicateTrackingNumber")?.toString()
+                val remarkText = duplicateResult?.get("remark")?.toString()
+                val embedding = duplicateResult?.get("embedding") as? List<*>
+
+                val similarityScore = when (val value = duplicateResult?.get("similarityScore")) {
+                    is Number -> value.toDouble()
+                    is String -> value.toDoubleOrNull()
+                    else -> null
                 }
 
-                // 🔮 Get AI priority score
-                val priority = getPriorityFromGemini(title, desc)
+                val duplicateDistanceMeters = when (val value = duplicateResult?.get("duplicateDistanceMeters")) {
+                    is Number -> value.toDouble()
+                    is String -> value.toDoubleOrNull()
+                    else -> null
+                }
 
-                // Create issue in /all_issues
+                updateSubmissionProgress("Analyzing priority...")
+
+                val priority = if (isDuplicate) 0.0 else getPriorityFromGemini(title, desc)
+
+                val now = System.currentTimeMillis()
+
+                val remarks = if (isDuplicate && !remarkText.isNullOrBlank()) {
+                    listOf(
+                        hashMapOf<String, Any>(
+                            "text" to remarkText,
+                            "by" to "System",
+                            "at" to now
+                        )
+                    )
+                } else {
+                    emptyList()
+                }
+
                 val issueId = firestore.collection("all_issues").document().id
                 val issueData = hashMapOf(
                     "ownerUid" to uid,
@@ -296,21 +470,31 @@ class ReportFragment : Fragment() {
                     "category" to category,
                     "description" to desc,
                     "location" to location,
+                    "latitude" to latitude,
+                    "longitude" to longitude,
                     "imageUrl" to imageUrl,
-                    "status" to "Pending",
-                    "timestamp" to System.currentTimeMillis(),
+                    "status" to if (isDuplicate) "Rejected" else "Pending",
+                    "timestamp" to now,
                     "trackingNumber" to "TRK-${UUID.randomUUID().toString().take(8).uppercase()}",
                     "priorityScore" to priority,
-                    "duplicateOf" to null,
-                    "remarks" to emptyList<Map<String, Any>>(),
-                    "remarksCount" to 0
+                    "duplicateOf" to if (isDuplicate) duplicateOf else null,
+                    "duplicateTrackingNumber" to duplicateTrackingNumber,
+                    "remarks" to remarks,
+                    "remarksCount" to remarks.size,
+                    "embedding" to (embedding ?: emptyList<Any>()),
+                    "similarityScore" to similarityScore,
+                    "duplicateDistanceMeters" to duplicateDistanceMeters
                 )
 
+                updateSubmissionProgress("Processing...", allowJustAMinute = true)
                 firestore.collection("all_issues").document(issueId).set(issueData).await()
+
+                completeSubmissionProgress()
 
                 withContext(Dispatchers.Main) {
                     if (!isAdded || _binding == null) return@withContext
-                    Toast.makeText(requireContext(), "Issue submitted successfully!", Toast.LENGTH_SHORT).show()
+
+                    Toast.makeText(requireContext(), "Issue submitted successfully!", Toast.LENGTH_LONG).show()
 
                     requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
                         .selectedItemId = R.id.nav_home
@@ -321,6 +505,8 @@ class ReportFragment : Fragment() {
                 }
 
             } catch (e: Exception) {
+                hideSubmissionProgress()
+
                 withContext(Dispatchers.Main) {
                     if (!isAdded || _binding == null) return@withContext
                     Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
@@ -330,7 +516,11 @@ class ReportFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        justAMinuteJob?.cancel()
+        submissionDialog?.dismiss()
+        submissionDialog = null
+        submissionStatusText = null
         _binding = null
+        super.onDestroyView()
     }
 }

@@ -34,9 +34,6 @@ class IssueDetailFragment : Fragment() {
     private var trackingNumber: String? = null
     private var imageUrl: String? = null
 
-    private var similarityScore: Double? = null
-    private var duplicateTrackingNumber: String? = null
-
     private var isAdmin: Boolean = false
 
     companion object {
@@ -49,9 +46,7 @@ class IssueDetailFragment : Fragment() {
             location: String,
             status: String,
             trackingNumber: String,
-            imageUrl: String? = null,
-            similarityScore: Double? = null,
-            duplicateTrackingNumber: String? = null
+            imageUrl: String? = null
         ): IssueDetailFragment {
             val fragment = IssueDetailFragment()
             val args = Bundle().apply {
@@ -64,8 +59,6 @@ class IssueDetailFragment : Fragment() {
                 putString("status", status)
                 putString("trackingNumber", trackingNumber)
                 putString("imageUrl", imageUrl)
-                if (similarityScore != null) putDouble("similarityScore", similarityScore)
-                putString("duplicateTrackingNumber", duplicateTrackingNumber)
             }
             fragment.arguments = args
             return fragment
@@ -90,11 +83,6 @@ class IssueDetailFragment : Fragment() {
             status = it.getString("status")
             trackingNumber = it.getString("trackingNumber")
             imageUrl = it.getString("imageUrl")
-
-            if (it.containsKey("similarityScore")) {
-                similarityScore = it.getDouble("similarityScore")
-            }
-            duplicateTrackingNumber = it.getString("duplicateTrackingNumber")
         }
 
         checkUserTypeAndSetup()
@@ -124,20 +112,7 @@ class IssueDetailFragment : Fragment() {
         binding.tvTracking.text = "#$trackingNumber"
         binding.tvDescription.text = desc
 
-        if (similarityScore != null) {
-            binding.tvSimilarityScore.visibility = View.VISIBLE
-            binding.tvSimilarityScore.text = "Similarity Score: ${"%.3f".format(similarityScore)}"
-        } else {
-            binding.tvSimilarityScore.visibility = View.GONE
-        }
-
-        if (!duplicateTrackingNumber.isNullOrBlank()) {
-            binding.tvSimilarToTracking.visibility = View.VISIBLE
-            binding.tvSimilarToTracking.text = "Similar to: $duplicateTrackingNumber"
-        } else {
-            binding.tvSimilarToTracking.visibility = View.GONE
-        }
-
+        // Load image
         if (!imageUrl.isNullOrEmpty()) {
             binding.ivIssueImage.visibility = View.VISIBLE
             Glide.with(requireContext()).load(imageUrl).into(binding.ivIssueImage)
@@ -145,6 +120,7 @@ class IssueDetailFragment : Fragment() {
             binding.ivIssueImage.visibility = View.GONE
         }
 
+        // Initialize dropdown properly
         val adapter = ArrayAdapter.createFromResource(
             requireContext(),
             R.array.issue_status_list,
@@ -152,8 +128,10 @@ class IssueDetailFragment : Fragment() {
         )
         binding.spStatus.setAdapter(adapter)
 
+        // Show admin controls if user is admin
         binding.layoutAdminControls.visibility = if (isAdmin) View.VISIBLE else View.GONE
 
+        // Click listeners
         binding.btnAddRemark.setOnClickListener { addRemark() }
         binding.btnUpdateStatus.setOnClickListener { updateStatus() }
     }
@@ -175,9 +153,7 @@ class IssueDetailFragment : Fragment() {
                 val remarks = (doc.get("remarks") as? List<Map<String, Any>>) ?: emptyList()
                 val priorityScore = (doc.getDouble("priorityScore") ?: 0.0).coerceIn(0.0, 1.0)
 
-                val similarityScoreValue = doc.getDouble("similarityScore")
-                val duplicateTrackingValue = doc.getString("duplicateTrackingNumber")
-
+                // 🕒 Format date
                 val formattedDate = timestamp?.let {
                     SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(Date(it))
                 } ?: "-"
@@ -189,35 +165,23 @@ class IssueDetailFragment : Fragment() {
                     remarks.joinToString("\n• ", prefix = "• ") { it["text"].toString() }
                 }
 
+                // 🎨 Determine priority label and color
                 val (label, colorRes) = when {
                     priorityScore >= 0.75 -> "High" to R.color.priority_high
                     priorityScore >= 0.4 -> "Medium" to R.color.priority_medium
                     else -> "Low" to R.color.priority_low
                 }
 
+                // 🟩 Always display priority label
                 binding.tvPriority.text = "Priority: $label"
                 val bg = binding.tvPriority.background?.mutate() as? GradientDrawable
                 bg?.setColor(requireContext().getColor(colorRes))
-
-                if (similarityScoreValue != null) {
-                    binding.tvSimilarityScore.visibility = View.VISIBLE
-                    binding.tvSimilarityScore.text =
-                        "Similarity Score: ${"%.3f".format(similarityScoreValue)}"
-                } else {
-                    binding.tvSimilarityScore.visibility = View.GONE
-                }
-
-                if (!duplicateTrackingValue.isNullOrBlank()) {
-                    binding.tvSimilarToTracking.visibility = View.VISIBLE
-                    binding.tvSimilarToTracking.text = "Similar to: $duplicateTrackingValue"
-                } else {
-                    binding.tvSimilarToTracking.visibility = View.GONE
-                }
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to load issue details.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     private fun colorPriorityPill(priority: Int) {
         val bg = binding.tvPriority.background?.mutate() as? GradientDrawable ?: return

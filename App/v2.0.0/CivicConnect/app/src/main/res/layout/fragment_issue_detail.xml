@@ -109,6 +109,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <TextView
+                android:id="@+id/tvSimilarityScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#6B6B6B"
+                android:visibility="gone" />
+
+        <TextView
+                android:id="@+id/tvSimilarToTracking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#6B6B6B"
+                android:visibility="gone" />
+
 
         <!-- ✳️ Admin Controls (Hidden for Citizens) -->
         <!-- ADMIN CONTROLS -->

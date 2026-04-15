@@ -64,6 +64,7 @@ class ProfileFragment : Fragment() {
     private fun loadIssueStats(userType: String = "Citizen") {
         val uid = auth.currentUser?.uid ?: return
 
+        // If Admin → show global stats, else personal
         val query = if (userType == "Administrator") {
             firestore.collection("all_issues")
         } else {
@@ -72,30 +73,19 @@ class ProfileFragment : Fragment() {
 
         query.get()
             .addOnSuccessListener { snapshot ->
-                val nonRejectedReports = snapshot.documents.filter {
-                    it.getString("status") != "Rejected"
+                val total = snapshot.size()
+                val inProgress = snapshot.count {
+                    it.getString("status") == "In Progress" || it.getString("status") == "Under Review"
                 }
+                val resolved = snapshot.count { it.getString("status") == "Resolved" }
+                val rate = if (total > 0) (resolved * 100.0 / total) else 0.0
 
-                val totalNonRejected = nonRejectedReports.size
-
-                val inProgress = nonRejectedReports.count {
-                    val status = it.getString("status")
-                    status == "In Progress" || status == "Under Review"
-                }
-
-                val resolved = nonRejectedReports.count {
-                    it.getString("status") == "Resolved"
-                }
-
-                val rate = if (totalNonRejected > 0) {
-                    resolved * 100.0 / totalNonRejected
-                } else {
-                    0.0
-                }
-
-                binding.tvReported.text = totalNonRejected.toString()
+                // Update UI
+                binding.tvReported.text = total.toString()
                 binding.tvResolved.text = resolved.toString()
                 binding.tvResolutionRate.text = String.format("%.1f%%", rate)
+
+
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Failed to load issue stats.", Toast.LENGTH_SHORT).show()

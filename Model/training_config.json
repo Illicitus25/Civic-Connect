@@ -1,0 +1,15 @@
+{
+  "preprocess_handle": "https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3",
+  "encoder_handle": "https://tfhub.dev/tensorflow/small_bert/bert_en_uncased_L-4_H-512_A-8/1",
+  "max_epochs": 5,
+  "batch_size": 16,
+  "learning_rate": 3e-05,
+  "validation_size": 0.15,
+  "test_size": 0.15,
+  "random_state": 42,
+  "dropout": 0.2,
+  "title_col": "Title",
+  "description_col": "Description",
+  "category_col": "Category",
+  "label_col": "PriorityScore"
+}
