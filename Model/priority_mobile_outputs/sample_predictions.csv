@@ -1,0 +1,51 @@
+Title,Description,Category,PriorityScore,teacher_prediction,student_prediction
+Fire reported near market,fire near market immediate danger,Public Safety,0.81,0.88901836,0.8844793
+Clinic issue reported in residential area,clinic issue in residential area needs attention soon,Healthcare,0.683,0.5654151,0.55609137
+Litter reported on main road,litter on main road affecting daily activities,Waste & Sanitation,0.54,0.54479593,0.56319696
+Road crack reported at junction,road crack at junction not urgent,Roads & Infra,0.266,0.2825137,0.26861653
+Gas leak reported at junction,gas leak at junction not urgent,Public Safety,0.299,0.275855,0.24102177
+Litter reported near school,litter near school high risk of injury,Waste & Sanitation,0.952,0.8944281,0.869071
+Park bench reported in public park,park bench in public park serious hazard,Public Spaces,0.955,0.88594985,0.88308316
+Litter reported at hospital,litter at hospital causing inconvenience,Waste & Sanitation,0.525,0.5580297,0.5460637
+Facility damage reported near office area,facility damage near office area should be repaired,Civic Services,0.499,0.56590676,0.5618352
+Air pollution reported on highway,air pollution on highway can be fixed later,Environment,0.197,0.28443208,0.2504752
+Chemical spill reported at bus stop,chemical spill at bus stop causing inconvenience,Environment,0.466,0.55284685,0.55916834
+Hospital equipment reported on main road,hospital equipment on main road not urgent,Healthcare,0.393,0.2821419,0.24805695
+Vehicle jam reported at bus stop,vehicle jam at bus stop emergency situation,Traffic & Transport,0.786,0.88413274,0.8616778
+Footpath reported at junction,footpath at junction minor issue observed,Public Spaces,0.397,0.2575546,0.25566745
+Facility damage reported at bus stop,facility damage at bus stop risk to public safety,Civic Services,0.938,0.87976897,0.86335737
+Facility damage reported near market,facility damage near market urgent action required,Civic Services,0.804,0.89030373,0.86914283
+Pothole reported in public park,pothole in public park moderate risk,Roads & Infra,0.478,0.550218,0.54914653
+Litter reported on highway,litter on highway can be fixed later,Waste & Sanitation,0.333,0.28923094,0.25537792
+Vehicle jam reported at bus stop,vehicle jam at bus stop creating delays,Traffic & Transport,0.51,0.5676024,0.57206523
+Footpath reported at junction,footpath at junction creating delays,Public Spaces,0.649,0.5597527,0.54956186
+Pothole reported on main road,pothole on main road needs attention soon,Roads & Infra,0.68,0.5810451,0.57531166
+Streetlight reported on main road,streetlight on main road risk to public safety,Street Lighting,0.89,0.8817527,0.8793336
+Chemical spill reported near school,chemical spill near school emergency situation,Environment,0.843,0.8873875,0.84026045
+Sewage overflow reported near office area,sewage overflow near office area risk to public safety,Water & Drainage,0.968,0.88271904,0.858856
+Hospital equipment reported in residential area,hospital equipment in residential area risk to public safety,Healthcare,0.861,0.87509704,0.8694066
+Broken pavement reported at bus stop,broken pavement at bus stop urgent action required,Roads & Infra,0.797,0.885767,0.84748477
+Clinic issue reported near market,clinic issue near market low impact problem,Healthcare,0.336,0.2513069,0.24999128
+Dust reported at bus stop,dust at bus stop creating delays,Environment,0.462,0.56416595,0.5700325
+Sewage overflow reported on main road,sewage overflow on main road should be repaired,Water & Drainage,0.502,0.5614866,0.57255787
+Burning waste reported on main road,burning waste on main road no major inconvenience,Environment,0.113,0.27638543,0.25750357
+Drain overflow reported in public park,drain overflow in public park affecting daily activities,Water & Drainage,0.53,0.5317868,0.54409796
+Air pollution reported in public park,air pollution in public park urgent action required,Environment,0.825,0.8889538,0.8773906
+Waterlogging reported near office area,waterlogging near office area moderate risk,Water & Drainage,0.69,0.5475032,0.5523106
+Facility damage reported on main road,facility damage on main road moderate risk,Civic Services,0.655,0.5562536,0.5512229
+Pothole reported on main road,pothole on main road serious hazard,Roads & Infra,0.976,0.88590837,0.86717176
+Waterlogging reported in residential area,waterlogging in residential area creating delays,Water & Drainage,0.692,0.550558,0.5462456
+Pipe burst reported in public park,pipe burst in public park risk to public safety,Water & Drainage,0.794,0.8775882,0.8753349
+Street sign reported near school,street sign near school minor issue observed,Civic Services,0.306,0.25383043,0.26716468
+Damaged road reported near school,damaged road near school no major inconvenience,Roads & Infra,0.363,0.27974284,0.24624968
+Public park reported at junction,public park at junction not urgent,Public Spaces,0.143,0.27367166,0.26196176
+Vehicle jam reported at hospital,vehicle jam at hospital risk to public safety,Traffic & Transport,0.891,0.87193835,0.8681275
+Park bench reported on highway,park bench on highway not urgent,Public Spaces,0.254,0.28114378,0.24111484
+Signboard reported near office area,signboard near office area emergency situation,Civic Services,0.877,0.8781598,0.85035026
+Litter reported in public park,litter in public park causing inconvenience,Waste & Sanitation,0.455,0.5557851,0.5494592
+Waste accumulation reported at bus stop,waste accumulation at bus stop moderate risk,Waste & Sanitation,0.46,0.57944953,0.56067693
+Dust reported at bus stop,dust at bus stop affecting daily activities,Environment,0.543,0.5464953,0.563325
+Overflowing bin reported on highway,overflowing bin on highway moderate risk,Waste & Sanitation,0.497,0.55970824,0.56332713
+Sewage overflow reported near school,sewage overflow near school not urgent,Water & Drainage,0.13,0.26947004,0.26742086
+Bus stop reported on highway,bus stop on highway not urgent,Public Spaces,0.282,0.28131872,0.2662601
+Sinkhole reported at bus stop,sinkhole at bus stop not urgent,Roads & Infra,0.257,0.27893344,0.26888657

@@ -1,0 +1,30 @@
+{
+  "teacher_available": true,
+  "teacher_metrics": {
+    "mae": 0.06666208803653717,
+    "mse": 0.006093432195484638,
+    "rmse": 0.07806043937542652,
+    "r2": 0.9118697176856061,
+    "band_accuracy": 0.8744444444444445
+  },
+  "student_metrics": {
+    "mae": 0.06528863310813904,
+    "mse": 0.005768338218331337,
+    "rmse": 0.07594957681469554,
+    "r2": 0.9165716012528343,
+    "band_accuracy": 0.8744444444444445
+  },
+  "actual_vocab_size": 151,
+  "max_sequence_length": 96,
+  "artifacts": [
+    "priority_mobile_regressor.tflite",
+    "priority_mobile_regressor.keras",
+    "vocabulary.txt",
+    "training_config.json",
+    "PriorityTokenizer.kt.txt",
+    "tokenizer_examples.json",
+    "sample_predictions.csv",
+    "student_test_metrics.json",
+    "student_history.json"
+  ]
+}
